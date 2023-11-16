@@ -15,6 +15,8 @@ public class form {
     private JLabel label1;
     private JLabel label2;
 
+    private JTextField[][] matrix;
+
     public form() {
         button1.addActionListener(new ActionListener() {
             @Override
@@ -25,9 +27,37 @@ public class form {
                 panel123.removeAll();
                 panel123.setLayout(new GridLayout(rows, columns));
 
+                matrix = new JTextField[rows][columns];
+
                 random(rows, columns);
 
                 panel123.updateUI();
+
+                // автовыполнение расчета
+                int countNullColumns = countColumnsWithZeros(matrix);
+                label1.setText("Количество столбцов с нулевыми элементами: " + countNullColumns);
+
+                double maxElement = Double.MIN_VALUE;
+                String maxElementRows = "";
+
+                for (int i = 0; i < matrix.length; i++) {
+                    for (int j = 0; j < matrix[i].length; j++) {
+                        double currentElement = Double.parseDouble(matrix[i][j].getText());
+                        if (currentElement > maxElement) {
+                            maxElement = currentElement;
+                            maxElementRows = String.valueOf(i);
+                        } else if (currentElement == maxElement) {
+                            maxElementRows += ", " + (i);
+                        }
+                    }
+                }
+
+                if (!maxElementRows.isEmpty()) {
+                    label2.setText("Номера строк с максимальным элементом (" + maxElement + "): " + maxElementRows);
+                } else {
+                    label2.setText("Нет данных");
+                }
+
             }
         });
 
@@ -39,42 +69,47 @@ public class form {
 
                 panel123.removeAll();
                 panel123.setLayout(new GridLayout(rows, columns));
-                panel123.setLocation(0,0);
+
+                matrix = new JTextField[rows][columns];
+
                 for (int i = 0; i < rows; i++) {
                     for (int j = 0; j < columns; j++) {
-                        panel123.add(new TextField());
+                        matrix[i][j] = new JTextField();
+                        panel123.add(matrix[i][j]);
                     }
                 }
                 panel123.updateUI();
             }
         });
+
         посчитатьButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                int countNullColumns = countColumnsWithZeros(matrix);
+                label1.setText("Количество столбцов с нулевыми элементами: " + countNullColumns);
 
-            }
-        });
-    }
+                double maxElement = Double.MIN_VALUE;
+                String maxElementRows = "";
 
-    public static int countColsWithZeros(int[][] matrix) { // метод для поиска стобцов с нулями и вывода их количества
-        // инициализация переменных
-        int rows = matrix.length;
-        int cols = matrix[0].length;
-        int count = 0; // количество столбцов в которых есть нули
+                for (int i = 0; i < matrix.length; i++) {
+                    for (int j = 0; j < matrix[i].length; j++) {
+                        double currentElement = Double.parseDouble(matrix[i][j].getText());
+                        if (currentElement > maxElement) {
+                            maxElement = currentElement;
+                            maxElementRows = String.valueOf(i);
+                        } else if (currentElement == maxElement) {
+                            maxElementRows += ", " + (i);
+                        }
+                    }
+                }
 
-        for (int j = 0; j < cols; j++) { // перебор столбцов пока не закончатся строки
-            boolean hasZero = false;
-            for (int i = 0; i < rows; i++) {
-                if (matrix[i][j] == 0) { // проверка каждого значения на 0
-                    hasZero = true;
-                    break;
+                if (!maxElementRows.isEmpty()) {
+                    label2.setText("Номера строк с максимальным элементом (" + maxElement + "): " + maxElementRows);
+                } else {
+                    label2.setText("Нет данных");
                 }
             }
-            if (hasZero) { // прибавление 1, если найден 0
-                count++;
-            }
-        }
-        return count; // возвращаем количество строк с нулями
+        });
     }
 
     private void random(int rows, int columns) {
@@ -82,18 +117,37 @@ public class form {
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                TextField textField = new TextField();
-                textField.setText(String.valueOf(random.nextInt(100)));
-                panel123.add(textField);
+                matrix[i][j] = new JTextField();
+                matrix[i][j].setText(String.valueOf(random.nextInt(100)));
+                panel123.add(matrix[i][j]);
             }
         }
     }
 
+    private int countColumnsWithZeros(JTextField[][] matrix) {
+        int count = 0;
+
+        for (int j = 0; j < matrix[0].length; j++) {
+            for (int i = 0; i < matrix.length; i++) {
+                if (matrix[i][j] != null && matrix[i][j].getText().equals("0")) {
+                    count++;
+                    break;
+                }
+            }
+        }
+
+        return count;
+    }
+
     public static void main(String[] args) {
-        JFrame frame = new JFrame("Form");
+        JFrame frame = new JFrame("Двумерные массивы");
         frame.setContentPane(new form().panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(600, 400));
+        frame.setMinimumSize(new Dimension(748, 500));
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - frame.getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - frame.getHeight()) / 2);
+        frame.setLocation(x, y);
         frame.pack();
         frame.setVisible(true);
     }
